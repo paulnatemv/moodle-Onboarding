@@ -24,44 +24,5 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-/**
- * Called before footer on every page - used to auto-redirect from confirm page to onboarding.
- *
- * When a user confirms their email, Moodle shows a "Thanks!" page with a Continue button.
- * This function detects that page and auto-redirects to onboarding for a seamless experience.
- */
-function local_onboarding_before_footer() {
-    global $PAGE, $USER, $SESSION, $DB;
-
-    // Only run on the login confirm page.
-    if ($PAGE->pagetype !== 'login-confirm') {
-        return;
-    }
-
-    // Must be logged in.
-    if (!isloggedin() || isguestuser()) {
-        return;
-    }
-
-    // Check if plugin is enabled.
-    if (!get_config('local_onboarding', 'enabled')) {
-        return;
-    }
-
-    // Check if user needs onboarding (has wantsurl set to onboarding).
-    if (empty($SESSION->wantsurl) || strpos($SESSION->wantsurl, '/local/onboarding/') === false) {
-        return;
-    }
-
-    $onboardingurl = $SESSION->wantsurl;
-
-    // Inject JavaScript to auto-redirect after a brief moment.
-    $PAGE->requires->js_amd_inline("
-        require([], function() {
-            // Wait for page to fully load, then redirect.
-            setTimeout(function() {
-                window.location.href = " . json_encode($onboardingurl) . ";
-            }, 1500);
-        });
-    ");
-}
+// Hook callbacks are now in classes/hook_callbacks.php and registered in db/hooks.php.
+// This file is kept for any future lib functions that may be needed.

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data.
+ * Hook callbacks for local_onboarding.
  *
  * @package    local_onboarding
  * @copyright  2025 BixAgency.com
@@ -24,8 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2025010505;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2024100700;        // Requires Moodle 4.5+ (compatible with Moodle 5).
-$plugin->component = 'local_onboarding'; // Full name of the plugin.
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = '1.0.4';
+$callbacks = [
+    [
+        'hook' => \core\hook\output\before_footer_html_generation::class,
+        'callback' => \local_onboarding\hook_callbacks::class . '::before_footer',
+        'priority' => 500,
+    ],
+];

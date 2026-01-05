@@ -592,10 +592,12 @@ class step {
      * @return array
      */
     public function export_for_template(): array {
+        $context = \context_system::instance();
+
         return [
             'id' => $this->id,
             'flowid' => $this->flowid,
-            'title' => $this->title,
+            'title' => format_string($this->title, true, ['context' => $context]),
             'content' => $this->get_formatted_content(),
             'steptype' => $this->steptype,
             'hasvideo' => $this->has_video(),
@@ -606,7 +608,7 @@ class step {
             'hasimage' => $this->has_image(),
             'imageurl' => $this->imageurl,
             'hascta' => $this->has_cta(),
-            'ctabutton' => $this->ctabutton,
+            'ctabutton' => format_string($this->ctabutton ?? '', true, ['context' => $context]),
             'ctaurl' => $this->ctaurl,
             'ctanewtab' => $this->ctanewtab,
             'sortorder' => $this->sortorder,

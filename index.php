@@ -88,13 +88,16 @@ $PAGE->requires->css('/local/onboarding/styles.css');
 // Prepare template data.
 $stepdata = $currentstep->export_for_template();
 
+// Context for format_string.
+$context = context_system::instance();
+
 // Prepare progress steps for indicator.
 $progresssteps = [];
 foreach ($steps as $index => $step) {
     $stepnum = $index + 1;
     $progresssteps[] = [
         'stepnumber' => $stepnum,
-        'title' => $step->get_title(),
+        'title' => format_string($step->get_title(), true, ['context' => $context]),
         'completed' => $stepnum < $currentnumber,
         'current' => $stepnum === $currentnumber,
     ];
@@ -102,7 +105,7 @@ foreach ($steps as $index => $step) {
 
 $templatedata = [
     'flowid' => $flowid,
-    'flowname' => $flow->get_name(),
+    'flowname' => format_string($flow->get_name(), true, ['context' => $context]),
     'step' => $stepdata,
     'currentstep' => $currentnumber,
     'totalsteps' => $totalsteps,
