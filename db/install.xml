@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/onboarding/db" VERSION="20250105" COMMENT="XMLDB file for local_onboarding plugin"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <!-- Main onboarding flow configuration -->
+    <TABLE NAME="local_onboarding_flows" COMMENT="Onboarding flow definitions">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Admin-friendly name for the flow"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="mandatory" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="If 1, users cannot skip"/>
+        <FIELD NAME="targetroles" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON array of role IDs, empty means all"/>
+        <FIELD NAME="redirecturl" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="URL to redirect after completion"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fk_usermodified" TYPE="foreign" FIELDS="usermodified" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="idx_enabled" UNIQUE="false" FIELDS="enabled"/>
+      </INDEXES>
+    </TABLE>
+
+    <!-- Individual steps within a flow -->
+    <TABLE NAME="local_onboarding_steps" COMMENT="Steps within an onboarding flow">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="flowid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="content" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Rich text content for the step"/>
+        <FIELD NAME="contentformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+        <FIELD NAME="steptype" TYPE="char" LENGTH="50" NOTNULL="true" DEFAULT="content" SEQUENCE="false" COMMENT="video, content, image, or mixed"/>
+        <FIELD NAME="videourl" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="YouTube/Vimeo URL or embedded video"/>
+        <FIELD NAME="videorequired" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Must watch video before proceeding"/>
+        <FIELD NAME="videocompletion" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="80" SEQUENCE="false" COMMENT="Percentage of video required to watch (0-100)"/>
+        <FIELD NAME="imageurl" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Image URL for step"/>
+        <FIELD NAME="ctabutton" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="CTA button text"/>
+        <FIELD NAME="ctaurl" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="URL for CTA button"/>
+        <FIELD NAME="ctanewtab" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Open CTA in new tab"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fk_flowid" TYPE="foreign" FIELDS="flowid" REFTABLE="local_onboarding_flows" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="idx_flowid_sortorder" UNIQUE="false" FIELDS="flowid, sortorder"/>
+      </INDEXES>
+    </TABLE>
+
+    <!-- User completion tracking -->
+    <TABLE NAME="local_onboarding_completion" COMMENT="User onboarding completion tracking">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="flowid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="stepid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Current step, NULL if flow complete"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="pending" SEQUENCE="false" COMMENT="pending, inprogress, completed"/>
+        <FIELD NAME="videotime" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Seconds of video watched in current step"/>
+        <FIELD NAME="timestarted" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fk_userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="fk_flowid" TYPE="foreign" FIELDS="flowid" REFTABLE="local_onboarding_flows" REFFIELDS="id"/>
+        <KEY NAME="fk_stepid" TYPE="foreign" FIELDS="stepid" REFTABLE="local_onboarding_steps" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="idx_userid_flowid" UNIQUE="true" FIELDS="userid, flowid"/>
+        <INDEX NAME="idx_status" UNIQUE="false" FIELDS="status"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

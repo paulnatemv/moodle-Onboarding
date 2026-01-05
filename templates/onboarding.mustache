@@ -1,0 +1,177 @@
+{{!
+    @template local_onboarding/onboarding
+
+    Full-screen onboarding experience.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * data-flowid - The flow ID
+    * data-stepid - The current step ID
+    * data-region="onboarding" - Main container
+
+    Context variables required for this template:
+    * flowid - The flow ID
+    * flowname - The flow name
+    * step - Current step data
+    * currentstep - Current step number
+    * totalsteps - Total number of steps
+    * progresssteps - Array of progress step data
+    * isfirst - Is this the first step
+    * islast - Is this the last step
+    * returnurl - URL to return to after completion
+    * sesskey - Session key for forms
+
+    Example context (json):
+    {
+        "flowid": 1,
+        "flowname": "Welcome Onboarding",
+        "step": {
+            "id": 1,
+            "title": "Welcome!",
+            "content": "<p>Welcome content here</p>",
+            "steptype": "video",
+            "hasvideo": true,
+            "videoembedurl": "https://youtube.com/embed/xyz",
+            "videorequired": true,
+            "videocompletion": 80
+        },
+        "currentstep": 1,
+        "totalsteps": 3,
+        "progresspercent": 0,
+        "isfirst": true,
+        "islast": false
+    }
+}}
+<div id="onboarding-container"
+     class="onboarding-fullscreen"
+     data-region="onboarding"
+     data-flowid="{{flowid}}"
+     data-stepid="{{step.id}}"
+     data-returnurl="{{returnurl}}">
+
+    {{! Progress indicator }}
+    <div class="onboarding-progress-wrapper">
+        <div class="onboarding-progress">
+            <div class="progress-steps">
+                {{#progresssteps}}
+                <div class="progress-step {{#completed}}completed{{/completed}} {{#current}}current{{/current}}">
+                    <span class="step-number">
+                        {{#completed}}<span class="checkmark">✓</span>{{/completed}}
+                        {{^completed}}{{stepnumber}}{{/completed}}
+                    </span>
+                    <span class="step-label">{{title}}</span>
+                </div>
+                {{/progresssteps}}
+            </div>
+        </div>
+    </div>
+
+    {{! Main content area }}
+    <div class="onboarding-content-wrapper">
+        <div class="onboarding-step" data-stepid="{{step.id}}">
+
+            {{! Step title }}
+            <h1 class="step-title">{{step.title}}</h1>
+
+            {{! Video (if present) }}
+            {{#step.hasvideo}}
+            <div class="video-container">
+                <div class="video-wrapper">
+                    <iframe
+                        id="onboarding-video-{{step.id}}"
+                        src="{{{step.videoembedurl}}}"
+                        title="{{step.title}}"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                {{#step.videorequired}}
+                <div class="video-progress-notice" id="video-notice">
+                    <div class="notice-text">
+                        <span class="notice-icon">&#9658;</span>
+                        {{#str}}watchvideotocontinue, local_onboarding{{/str}}
+                    </div>
+                    <div class="progress video-progress-bar">
+                        <div class="progress-bar bg-primary"
+                             id="video-progress"
+                             role="progressbar"
+                             style="width: 0%"
+                             data-required="{{step.videocompletion}}"
+                             aria-valuenow="0"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                </div>
+                {{/step.videorequired}}
+            </div>
+            {{/step.hasvideo}}
+
+            {{! Image (if present) }}
+            {{#step.hasimage}}
+            <div class="image-container">
+                <img src="{{step.imageurl}}" alt="{{step.title}}" class="step-image">
+            </div>
+            {{/step.hasimage}}
+
+            {{! Content }}
+            {{#step.content}}
+            <div class="step-content">
+                {{{step.content}}}
+            </div>
+            {{/step.content}}
+
+            {{! CTA Button (if present) }}
+            {{#step.hascta}}
+            <div class="cta-container">
+                <a href="{{step.ctaurl}}"
+                   class="btn btn-lg onboarding-cta"
+                   {{#step.ctanewtab}}target="_blank" rel="noopener"{{/step.ctanewtab}}>
+                    {{step.ctabutton}}
+                </a>
+            </div>
+            {{/step.hascta}}
+
+        </div>
+    </div>
+
+    {{! Navigation buttons }}
+    <div class="onboarding-nav-wrapper">
+        <form method="post" action="" class="onboarding-nav-form">
+            <input type="hidden" name="sesskey" value="{{sesskey}}">
+            <input type="hidden" name="action" value="next">
+
+            <div class="nav-buttons">
+                {{! Next/Finish button }}
+                <button type="submit"
+                        id="onboarding-next"
+                        class="btn btn-primary btn-lg"
+                        {{#step.videorequired}}disabled{{/step.videorequired}}>
+                    {{#islast}}
+                        {{#str}}finish, local_onboarding{{/str}}
+                    {{/islast}}
+                    {{^islast}}
+                        {{#str}}next, local_onboarding{{/str}}
+                        <span class="next-arrow">&rarr;</span>
+                    {{/islast}}
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+{{#js}}
+require(['local_onboarding/onboarding'], function(Onboarding) {
+    Onboarding.init({
+        flowId: {{flowid}},
+        stepId: {{step.id}},
+        hasVideo: {{#step.hasvideo}}true{{/step.hasvideo}}{{^step.hasvideo}}false{{/step.hasvideo}},
+        videoRequired: {{#step.videorequired}}true{{/step.videorequired}}{{^step.videorequired}}false{{/step.videorequired}},
+        videoCompletion: {{step.videocompletion}},
+        returnUrl: '{{returnurl}}'
+    });
+});
+{{/js}}
