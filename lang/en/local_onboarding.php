@@ -107,6 +107,7 @@ $string['next'] = 'Continue';
 $string['previous'] = 'Previous';
 $string['finish'] = 'Get Started';
 $string['skip'] = 'Skip';
+$string['toggletheme'] = 'Toggle light/dark mode';
 $string['stepof'] = 'Step {$a->current} of {$a->total}';
 $string['watchvideotocontinue'] = 'This short video will help you get the most out of your learning experience';
 $string['videoprogresstext'] = 'Video progress: {$a}%';

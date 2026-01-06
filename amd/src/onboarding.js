@@ -60,6 +60,55 @@ define(['core/ajax'], function(Ajax) {
         }
 
         setupKeyboardNav();
+        setupThemeToggle();
+    };
+
+    /**
+     * Setup theme toggle functionality.
+     */
+    var setupThemeToggle = function() {
+        var container = document.getElementById('onboarding-container');
+        var toggleBtn = document.getElementById('theme-toggle');
+
+        if (!container || !toggleBtn) {
+            return;
+        }
+
+        // Check saved preference or system preference
+        var savedTheme = localStorage.getItem('onboarding-theme');
+        if (savedTheme) {
+            applyTheme(savedTheme, container);
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            applyTheme('dark', container);
+        }
+
+        // Toggle button click handler
+        toggleBtn.addEventListener('click', function() {
+            var isDark = container.classList.contains('onboarding-dark');
+            var newTheme = isDark ? 'light' : 'dark';
+            applyTheme(newTheme, container);
+            localStorage.setItem('onboarding-theme', newTheme);
+        });
+
+        // Listen for system theme changes
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                if (!localStorage.getItem('onboarding-theme')) {
+                    applyTheme(e.matches ? 'dark' : 'light', container);
+                }
+            });
+        }
+    };
+
+    /**
+     * Apply theme to container.
+     *
+     * @param {string} theme 'light' or 'dark'
+     * @param {HTMLElement} container The onboarding container
+     */
+    var applyTheme = function(theme, container) {
+        container.classList.remove('onboarding-light', 'onboarding-dark');
+        container.classList.add('onboarding-' + theme);
     };
 
     /**

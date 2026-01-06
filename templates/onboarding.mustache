@@ -45,11 +45,19 @@
     }
 }}
 <div id="onboarding-container"
-     class="onboarding-fullscreen"
+     class="onboarding-fullscreen onboarding-light"
      data-region="onboarding"
      data-flowid="{{flowid}}"
      data-stepid="{{step.id}}"
      data-returnurl="{{returnurl}}">
+
+    {{! Theme toggle button }}
+    <div class="theme-toggle-wrapper">
+        <button type="button" class="theme-toggle-btn" id="theme-toggle" aria-label="{{#str}}toggletheme, local_onboarding{{/str}}">
+            <span class="icon-sun" aria-hidden="true">&#9728;</span>
+            <span class="icon-moon" aria-hidden="true">&#9790;</span>
+        </button>
+    </div>
 
     {{! Progress indicator }}
     <div class="onboarding-progress-wrapper">
